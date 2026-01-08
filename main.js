@@ -505,6 +505,16 @@ function setupSettings() {
         $('#settings-panel').toggleClass('active');
     });
     
+    // Close settings panel when clicking outside on mobile
+    $(document).on('click', function(e) {
+        if ($('#settings-panel').hasClass('active') && 
+            !$(e.target).closest('#settings-panel').length && 
+            !$(e.target).closest('#burger-menu').length) {
+            $('#burger-menu').removeClass('active');
+            $('#settings-panel').removeClass('active');
+        }
+    });
+    
     // Landmarks toggle
     $('#show-landmarks').on('change', function() {
         showLandmarks = this.checked;
@@ -559,7 +569,7 @@ function generateQRCode() {
     $('#qr-url').text(url);
     
     // Simple QR code generation using Google Charts API
-    const qrSize = isMobile ? 200 : 256;
+    const qrSize = isMobile ? 300 : 400;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(url)}`;
     
     const img = $('<img>').attr('src', qrUrl).attr('alt', 'QR Code');

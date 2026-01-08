@@ -257,7 +257,10 @@ h1 {
     margin: 20px 0;
 }
 
+#qr-code img,
 #qr-code canvas {
+    width: 80% !important;
+    height: auto !important;
     border: 4px solid #667eea;
     border-radius: 10px;
 }
