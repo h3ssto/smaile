@@ -37,11 +37,17 @@ async function init() {
     try {
         console.log('Loading face detection models...');
         
+        // Get the base URL for models (works both locally and on GitHub Pages)
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        const modelsPath = `${baseUrl}models`;
+        
+        console.log('Loading models from:', modelsPath);
+        
         // Load face-api.js models
         await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            faceapi.nets.faceExpressionNet.loadFromUri('/models')
+            faceapi.nets.tinyFaceDetector.loadFromUri(modelsPath),
+            faceapi.nets.faceLandmark68Net.loadFromUri(modelsPath),
+            faceapi.nets.faceExpressionNet.loadFromUri(modelsPath)
         ]);
         
         modelsLoaded = true;
