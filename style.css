@@ -221,7 +221,8 @@ h1 {
     padding: 40px;
     border-radius: 20px;
     text-align: center;
-    max-width: 400px;
+    max-width: 90vw;
+    max-height: 90vh;
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
@@ -235,6 +236,7 @@ h1 {
     color: #999;
     cursor: pointer;
     transition: color 0.2s;
+    z-index: 10;
 }
 
 .qr-close:hover {
@@ -254,14 +256,17 @@ h1 {
 #qr-code {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    align-items: center;
+    margin: 20px auto;
+    max-width: 60vh;
+    max-height: 60vh;
 }
 
 #qr-code img,
 #qr-code canvas {
-    width: 80% !important;
+    width: 100% !important;
     height: auto !important;
-    border: 4px solid #667eea;
+    max-width: 60vh !important;
     border-radius: 10px;
 }
 

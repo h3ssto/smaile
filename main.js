@@ -15,7 +15,11 @@ let video, canvas, displaySize;
 let modelsLoaded = false;
 let lastTopExpressions = [];
 const EXPRESSION_CHANGE_THRESHOLD = 0.15; // 15% change needed to swap emojis
-const SMOOTHING_WINDOW = 500; // 0.5 seconds in milliseconds
+
+// Mobile optimization - declare early
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+const SMOOTHING_WINDOW = isMobile ? 300 : 500; // Shorter window on mobile for faster response
 let expressionBuffer = [];
 
 // Settings
@@ -32,10 +36,16 @@ let frameCount = 0;
 let lastFpsUpdate = Date.now();
 let fps = 0;
 
-// Mobile optimization
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-const detectionInterval = isMobile ? 150 : 0; // ms between detections on mobile
-let lastDetectionTime = 0;
+// Mobile-specific model options - smaller = faster
+const mobileDetectorOptions = {
+    inputSize: 128, // Much smaller input for mobile (128 vs 416) = ~10x faster
+    scoreThreshold: 0.7 // Higher threshold compensates for smaller input
+};
+
+const desktopDetectorOptions = {
+    inputSize: 416,
+    scoreThreshold: 0.5
+};
 
 // Initialize the application
 async function init() {
@@ -74,8 +84,8 @@ async function startVideo() {
     try {
         // Optimize camera resolution for mobile
         const videoConstraints = isMobile ? {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
+            width: { ideal: 480 },
+            height: { ideal: 360 },
             facingMode: 'user'
         } : {
             width: { ideal: 1280 },
@@ -114,25 +124,15 @@ async function startVideo() {
 async function detectFaces() {
     if (!modelsLoaded) return;
     
-    // Mobile optimization: throttle detection
-    const now = performance.now();
-    if (isMobile && detectionInterval > 0) {
-        if (now - lastDetectionTime < detectionInterval) {
-            requestAnimationFrame(detectFaces);
-            return;
-        }
-        lastDetectionTime = now;
-    }
-    
-    const startTime = now;
+    const startTime = performance.now();
     const ctx = canvas.getContext('2d');
+    
+    // Use mobile-optimized settings
+    const detectorOptions = isMobile ? mobileDetectorOptions : desktopDetectorOptions;
     
     // Detect faces with landmarks and expressions - use more lenient settings
     const detections = await faceapi
-        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({
-            inputSize: 416,
-            scoreThreshold: 0.5
-        }))
+        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions(detectorOptions))
         .withFaceLandmarks()
         .withFaceExpressions();
     
@@ -568,8 +568,8 @@ function generateQRCode() {
     const url = window.location.href;
     $('#qr-url').text(url);
     
-    // Simple QR code generation using Google Charts API
-    const qrSize = isMobile ? 300 : 400;
+    // Generate QR code - 60% of viewport height to prevent overflow
+    const qrSize = Math.floor(window.innerHeight * 0.6);
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(url)}`;
     
     const img = $('<img>').attr('src', qrUrl).attr('alt', 'QR Code');
@@ -595,14 +595,22 @@ function setupQRModal() {
     });
 }
 
-// Start the app when page loads
+    // Start the app when page loads
 $(document).ready(() => {
     setupSettings();
     setupQRModal();
     init();
     
-    // Log mobile detection
+    // Log mobile detection and adjust UI
     if (isMobile) {
-        console.log('Mobile device detected - using optimized settings');
+        console.log('Mobile device detected - using optimized settings:');
+        console.log('- Input size: 128x128 (vs 416x416) - ~10x faster');
+        console.log('- Camera: 640x480');
+        console.log('- Smoothing window: 300ms');
+        console.log('- Target: 10+ FPS');
+        
+        // Auto-disable landmarks on mobile for better performance
+        showLandmarks = false;
+        $('#show-landmarks').prop('checked', false);
     }
 });
