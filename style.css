@@ -174,6 +174,102 @@ h1 {
     transition: width 0.3s ease;
 }
 
+/* QR Code Button */
+.qr-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.qr-button:hover {
+    transform: scale(1.1);
+}
+
+/* QR Modal */
+.qr-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.qr-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.qr-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2em;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.qr-close:hover {
+    color: #333;
+}
+
+.qr-modal-content h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.qr-modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#qr-code {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#qr-code canvas {
+    border: 4px solid #667eea;
+    border-radius: 10px;
+}
+
+.qr-url {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #667eea;
+    word-break: break-all;
+    font-weight: bold;
+}
+
 /* Burger Menu */
 .burger-menu {
     position: fixed;
@@ -291,15 +387,83 @@ h1 {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
     .container {
-        padding: 20px;
+        padding: 20px 15px;
     }
     
     h1 {
         font-size: 2em;
+        margin-bottom: 5px;
+    }
+    
+    .subtitle {
+        font-size: 1em;
+        margin-bottom: 20px;
+    }
+    
+    .video-container {
+        margin-bottom: 20px;
     }
     
     .emoji-icon {
-        font-size: 3em;
+        font-size: 2.5em;
+    }
+    
+    .emoji-item {
+        min-width: 90px;
+        min-height: 150px;
+        padding: 15px 10px;
+    }
+    
+    .emoji-list {
+        gap: 15px;
+    }
+    
+    .emoji-results h2 {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+    }
+    
+    .settings-panel {
+        width: 280px;
+        padding: 70px 20px 20px;
+    }
+    
+    .settings-panel h3 {
+        font-size: 1.3em;
+    }
+    
+    .qr-button {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3em;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .burger-menu {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 30px;
+    }
+    
+    .qr-modal-content {
+        margin: 20px;
+        padding: 30px 20px;
+        max-width: 90%;
+    }
+    
+    .stats-overlay {
+        font-size: 0.85em;
+        padding: 8px 10px;
+    }
+    
+    .expression-bars {
+        padding: 15px;
     }
 }

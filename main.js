@@ -32,6 +32,11 @@ let frameCount = 0;
 let lastFpsUpdate = Date.now();
 let fps = 0;
 
+// Mobile optimization
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const detectionInterval = isMobile ? 150 : 0; // ms between detections on mobile
+let lastDetectionTime = 0;
+
 // Initialize the application
 async function init() {
     try {
@@ -67,11 +72,18 @@ async function startVideo() {
     canvas = document.getElementById('overlay');
     
     try {
+        // Optimize camera resolution for mobile
+        const videoConstraints = isMobile ? {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+        } : {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        };
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            } 
+            video: videoConstraints
         });
         
         video.srcObject = stream;
@@ -102,7 +114,17 @@ async function startVideo() {
 async function detectFaces() {
     if (!modelsLoaded) return;
     
-    const startTime = performance.now();
+    // Mobile optimization: throttle detection
+    const now = performance.now();
+    if (isMobile && detectionInterval > 0) {
+        if (now - lastDetectionTime < detectionInterval) {
+            requestAnimationFrame(detectFaces);
+            return;
+        }
+        lastDetectionTime = now;
+    }
+    
+    const startTime = now;
     const ctx = canvas.getContext('2d');
     
     // Detect faces with landmarks and expressions - use more lenient settings
@@ -531,8 +553,46 @@ function setupSettings() {
     });
 }
 
+// Generate QR code
+function generateQRCode() {
+    const url = window.location.href;
+    $('#qr-url').text(url);
+    
+    // Simple QR code generation using Google Charts API
+    const qrSize = isMobile ? 200 : 256;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(url)}`;
+    
+    const img = $('<img>').attr('src', qrUrl).attr('alt', 'QR Code');
+    $('#qr-code').html(img);
+}
+
+// Setup QR modal handlers
+function setupQRModal() {
+    $('#qr-button').on('click', function() {
+        $('#qr-modal').addClass('active');
+        generateQRCode();
+    });
+    
+    $('#qr-close').on('click', function() {
+        $('#qr-modal').removeClass('active');
+    });
+    
+    // Close on outside click
+    $('#qr-modal').on('click', function(e) {
+        if (e.target.id === 'qr-modal') {
+            $(this).removeClass('active');
+        }
+    });
+}
+
 // Start the app when page loads
 $(document).ready(() => {
     setupSettings();
+    setupQRModal();
     init();
+    
+    // Log mobile detection
+    if (isMobile) {
+        console.log('Mobile device detected - using optimized settings');
+    }
 });

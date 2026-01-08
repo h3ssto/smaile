@@ -7,11 +7,27 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <!-- QR Code Button -->
+    <div class="qr-button" id="qr-button" title="Show QR Code">
+        📱
+    </div>
+    
     <!-- Burger Menu -->
     <div class="burger-menu" id="burger-menu">
         <span></span>
         <span></span>
         <span></span>
+    </div>
+    
+    <!-- QR Code Modal -->
+    <div class="qr-modal" id="qr-modal">
+        <div class="qr-modal-content">
+            <span class="qr-close" id="qr-close">&times;</span>
+            <h2>Join on Your Device</h2>
+            <p>Scan to participate:</p>
+            <div id="qr-code"></div>
+            <p class="qr-url" id="qr-url">Loading...</p>
+        </div>
     </div>
     
     <!-- Settings Panel -->
