@@ -36,6 +36,9 @@ let frameCount = 0;
 let lastFpsUpdate = Date.now();
 let fps = 0;
 
+// Security demo mode - disabled by default (insecure mode)
+let weakMode = false;
+
 // Mobile-specific model options - smaller = faster
 const mobileDetectorOptions = {
     inputSize: 128, // Much smaller input for mobile (128 vs 416) = ~10x faster
@@ -45,6 +48,12 @@ const mobileDetectorOptions = {
 const desktopDetectorOptions = {
     inputSize: 416,
     scoreThreshold: 0.5
+};
+
+// Weak mode options - accepts almost anything
+const weakDetectorOptions = {
+    inputSize: 160, // Smaller input for faster processing
+    scoreThreshold: 0.1 // VERY low threshold - accepts crude drawings, photos, anything!
 };
 
 // Initialize the application
@@ -130,10 +139,10 @@ async function detectFaces() {
     const startTime = performance.now();
     const ctx = canvas.getContext('2d');
     
-    // Use mobile-optimized settings
-    const detectorOptions = isMobile ? mobileDetectorOptions : desktopDetectorOptions;
+    // If security mode is OFF (weakMode = false), use weak detector; if ON, use normal settings
+    const detectorOptions = !weakMode ? weakDetectorOptions : (isMobile ? mobileDetectorOptions : desktopDetectorOptions);
     
-    // Detect faces with landmarks and expressions - use more lenient settings
+    // Detect faces with landmarks and expressions
     const detections = await faceapi
         .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions(detectorOptions))
         .withFaceLandmarks()
@@ -507,6 +516,7 @@ function drawFaceMesh(ctx, positions) {
 // Setup event listeners for settings
 function setupSettings() {
     // Initialize values to match current settings
+    $('#weak-mode').prop('checked', weakMode);
     $('#show-landmarks').prop('checked', showLandmarks);
     $('#show-contours').prop('checked', showContours);
     $('#show-mesh').prop('checked', showMesh);
@@ -577,6 +587,15 @@ function setupSettings() {
         console.log('Show stats:', showStats);
         if (!showStats) {
             $('#stats-overlay').hide();
+        }
+    });
+    
+    // Weak mode toggle
+    $('#weak-mode').on('change', function() {
+        weakMode = this.checked;
+        console.log('🔒 Security Mode:', weakMode ? 'ENABLED - Higher thresholds, more secure' : 'DISABLED - Accepts drawings, photos, anything!');
+        if (!weakMode) {
+            console.log('Detection threshold lowered to 10% - extremely insecure!');
         }
     });
 }
