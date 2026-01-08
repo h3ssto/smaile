@@ -295,9 +295,10 @@ h1 {
 .burger-menu span {
     display: block;
     height: 4px;
-    background: white;
+    background: #333;
     border-radius: 2px;
     transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .burger-menu.active span:nth-child(1) {

@@ -103,6 +103,9 @@ async function startVideo() {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             
+            // Enable hardware acceleration hints
+            const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+            
             displaySize = { 
                 width: video.videoWidth, 
                 height: video.videoHeight 
@@ -152,7 +155,7 @@ async function detectFaces() {
         // Resize detection results to match display size
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         
-        // Draw based on settings
+        // Draw facial features (optimized for both mobile and desktop)
         if (showLandmarks || showContours || showMesh) {
             drawFacialFeatures(canvas, resizedDetections[0]);
         }
@@ -388,6 +391,9 @@ function drawFacialFeatures(canvas, detection) {
     // Calculate which landmarks to show based on density
     const step = Math.ceil(100 / landmarkDensity);
     
+    // Batch canvas operations for better performance
+    ctx.save();
+    
     if (showMesh) {
         // Draw face mesh (triangulated surface)
         drawFaceMesh(ctx, positions);
@@ -395,39 +401,51 @@ function drawFacialFeatures(canvas, detection) {
     
     if (showContours) {
         // Draw facial contours (connecting lines)
-        const drawOptions = { lineWidth: 2, color: '#00ff00' };
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
         
-        // Jaw line
-        drawContour(ctx, positions.slice(0, 17), drawOptions);
-        // Left eyebrow
-        drawContour(ctx, positions.slice(17, 22), drawOptions);
-        // Right eyebrow
-        drawContour(ctx, positions.slice(22, 27), drawOptions);
-        // Nose bridge
-        drawContour(ctx, positions.slice(27, 31), drawOptions);
-        // Nose bottom
-        drawContour(ctx, positions.slice(31, 36), drawOptions);
-        // Left eye
-        drawContour(ctx, [...positions.slice(36, 42), positions[36]], drawOptions);
-        // Right eye
-        drawContour(ctx, [...positions.slice(42, 48), positions[42]], drawOptions);
-        // Outer lip
-        drawContour(ctx, [...positions.slice(48, 60), positions[48]], drawOptions);
-        // Inner lip
-        drawContour(ctx, [...positions.slice(60, 68), positions[60]], drawOptions);
+        // Batch all contours into single path
+        const contourGroups = [
+            positions.slice(0, 17),
+            positions.slice(17, 22),
+            positions.slice(22, 27),
+            positions.slice(27, 31),
+            positions.slice(31, 36),
+            [...positions.slice(36, 42), positions[36]],
+            [...positions.slice(42, 48), positions[42]],
+            [...positions.slice(48, 60), positions[48]],
+            [...positions.slice(60, 68), positions[60]]
+        ];
+        
+        contourGroups.forEach(group => {
+            if (group.length > 1) {
+                ctx.moveTo(group[0].x, group[0].y);
+                for (let i = 1; i < group.length; i++) {
+                    ctx.lineTo(group[i].x, group[i].y);
+                }
+            }
+        });
+        
+        ctx.stroke();
     }
     
     if (showLandmarks) {
-        // Draw landmark points in cyan
+        // Draw landmark points in cyan - batch operations
         ctx.fillStyle = '#00ffff';
+        ctx.beginPath();
+        
         positions.forEach((point, index) => {
             if (index % step === 0) {
-                ctx.beginPath();
+                ctx.moveTo(point.x + 2, point.y);
                 ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
-                ctx.fill();
             }
         });
+        
+        ctx.fill();
     }
+    
+    ctx.restore();
 }
 
 function drawContour(ctx, points, options) {
@@ -605,12 +623,14 @@ $(document).ready(() => {
     if (isMobile) {
         console.log('Mobile device detected - using optimized settings:');
         console.log('- Input size: 128x128 (vs 416x416) - ~10x faster');
-        console.log('- Camera: 640x480');
+        console.log('- Camera: 480x360');
         console.log('- Smoothing window: 300ms');
         console.log('- Target: 10+ FPS');
         
-        // Auto-disable landmarks on mobile for better performance
-        showLandmarks = false;
-        $('#show-landmarks').prop('checked', false);
+        // Keep landmarks enabled but disable expensive features
+        showContours = false;
+        showMesh = false;
+        $('#show-contours').prop('checked', false);
+        $('#show-mesh').prop('checked', false);
     }
 });
