@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smaile - Emoji Expression Matcher</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Burger Menu -->
+    <div class="burger-menu" id="burger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <h3>Settings</h3>
+        
+        <div class="setting-group">
+            <label class="toggle-label">
+                <input type="checkbox" id="show-landmarks" checked>
+                <span class="toggle-text">Show Landmarks</span>
+            </label>
+        </div>
+        
+        <div class="setting-group">
+            <label class="toggle-label">
+                <input type="checkbox" id="show-contours">
+                <span class="toggle-text">Show Facial Contours</span>
+            </label>
+        </div>
+        
+        <div class="setting-group">
+            <label class="toggle-label">
+                <input type="checkbox" id="show-mesh">
+                <span class="toggle-text">Show Face Mesh</span>
+            </label>
+        </div>
+        
+        <div class="setting-group">
+            <label for="landmark-density">Landmark Display: <span id="density-value">100%</span></label>
+            <input type="range" id="landmark-density" min="10" max="100" value="100" step="10">
+            <small>Visualization only - detection always uses all 68 landmarks</small>
+        </div>
+        
+        <hr>
+        <h4>Educational Info</h4>
+        
+        <div class="setting-group">
+            <label class="toggle-label">
+                <input type="checkbox" id="show-all-expressions">
+                <span class="toggle-text">Show All Expressions</span>
+            </label>
+            <small>Display confidence for all 7 emotions</small>
+        </div>
+        
+        <div class="setting-group">
+            <label for="confidence-threshold">Min Confidence: <span id="threshold-value">5%</span></label>
+            <input type="range" id="confidence-threshold" min="0" max="50" value="5" step="5">
+            <small>Filter emojis by confidence threshold</small>
+        </div>
+        
+        <div class="setting-group">
+            <label class="toggle-label">
+                <input type="checkbox" id="show-stats">
+                <span class="toggle-text">Show Detection Stats</span>
+            </label>
+            <small>FPS and processing time</small>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h1>😊 Smaile</h1>
+        <p class="subtitle">Your expression, emoji-fied!</p>
+        
+        <div class="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+            <div class="stats-overlay" id="stats-overlay" style="display: none;"></div>
+        </div>
+        
+        <div class="emoji-results">
+            <h2>Your Expression Matches:</h2>
+            <div id="emoji-display" class="emoji-list">
+                <div class="emoji-item">
+                    <span class="emoji-icon">🤔</span>
+                    <span class="emoji-confidence">Waiting...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
